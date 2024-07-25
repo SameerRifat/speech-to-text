@@ -1,5 +1,6 @@
 'use client';
 
+import { uploadAudio } from '@/lib/cloudinaryUpload';
 import { transcription } from '@/lib/transcribe';
 import { useState, useRef } from 'react';
 
@@ -52,12 +53,14 @@ const SpeechToTextPage = () => {
             const formData = new FormData();
             formData.append('file', file);
 
-            // Call server action directly
-            const transcriptionResult = await transcription(formData);
-
-            setTranscriptionText(transcriptionResult)
-
-            console.log(transcriptionResult);
+            try {
+                const transcriptionResult = await uploadAudio(formData);
+                setTranscriptionText(transcriptionResult);
+                console.log(transcriptionResult);
+            } catch (error) {
+                console.error('Error during transcription:', error);
+                setTranscriptionText('Error processing file');
+            }
         } else {
             console.error('No audio blob available for transcription.');
         }
@@ -110,11 +113,15 @@ export default SpeechToTextPage;
 //     const [isRecording, setIsRecording] = useState(false);
 //     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 //     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+//     const mediaStreamRef = useRef<MediaStream | null>(null);
+//     const [transcriptionText, setTranscriptionText] = useState('')
 
 //     const startRecording = () => {
 //         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
 //             const mediaRecorder = new MediaRecorder(stream);
 //             mediaRecorderRef.current = mediaRecorder;
+//             mediaStreamRef.current = stream; // Store the media stream
+
 //             mediaRecorder.start();
 
 //             const audioChunks: Blob[] = [];
@@ -134,6 +141,9 @@ export default SpeechToTextPage;
 //     const stopRecording = () => {
 //         mediaRecorderRef.current?.stop();
 //         setIsRecording(false);
+
+//         // Stop all tracks of the media stream
+//         mediaStreamRef.current?.getTracks().forEach(track => track.stop());
 //     };
 
 //     const handleSubmit = async (event: React.FormEvent) => {
@@ -151,6 +161,8 @@ export default SpeechToTextPage;
 //             // Call server action directly
 //             const transcriptionResult = await transcription(formData);
 
+//             setTranscriptionText(transcriptionResult)
+
 //             console.log(transcriptionResult);
 //         } else {
 //             console.error('No audio blob available for transcription.');
@@ -158,7 +170,7 @@ export default SpeechToTextPage;
 //     };
 
 //     return (
-//         <div>
+//         <div className='w-[90%] mx-auto mt-10'>
 //             <h1 className="text-orange-500 font-extrabold text-4xl mb-10 text-center">Record Audio for Transcription</h1>
 //             <div className="border border-gray-300 rounded-md p-10 flex flex-col text-start gap-5 bg-gray-50">
 //                 {isRecording ? (
@@ -183,6 +195,11 @@ export default SpeechToTextPage;
 //                     Upload and Transcribe
 //                 </button>
 //             </div>
+//             {transcriptionText && (
+//                 <div className='mt-10 max-w-3xl mx-auto border-2 border-red-500'>
+//                     {transcriptionText}
+//                 </div>
+//             )}
 //         </div>
 //     );
 // };

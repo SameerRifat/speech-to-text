@@ -93,7 +93,7 @@ const SpeechToTextPage = () => {
                 </button>
             </div>
             {transcriptionText && (
-                <div className='mt-10 max-w-3xl mx-auto border-2 border-red-500'>
+                <div className='mt-10 max-w-3xl mx-auto'>
                     {transcriptionText}
                 </div>
             )}

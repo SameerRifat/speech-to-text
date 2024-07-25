@@ -9,6 +9,11 @@ cloudinary.v2.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Define an interface for the Cloudinary upload result
+interface CloudinaryUploadResult {
+    url: string;
+}
+
 // Define the server action
 export const uploadAudio = async (formData: FormData): Promise<string> => {
     try {
@@ -21,14 +26,14 @@ export const uploadAudio = async (formData: FormData): Promise<string> => {
         // Convert Blob to Buffer
         const buffer = Buffer.from(await file.arrayBuffer());
 
-        const result = await new Promise((resolve, reject) => {
+        const result = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
             cloudinary.v2.uploader.upload_stream(
                 { resource_type: 'auto', folder: 'recordings' },
                 (error, result) => {
                     if (error) {
                         reject(error);
                     } else {
-                        resolve(result);
+                        resolve(result as CloudinaryUploadResult);
                     }
                 }
             ).end(buffer);
